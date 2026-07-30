@@ -7,6 +7,10 @@ var lastStampId = '';
 function init() {
 	canvas = $('#imageView').get(0);
 	context = canvas.getContext('2d');
+	context.lineWidth = 2;
+	var brush = document.getElementById('brushSize');
+
+	console.log(brushSize);
 	
 	// Auto-adjust canvas size to fit window.
 	canvas.width  = window.innerWidth - 75;
@@ -19,6 +23,11 @@ function init() {
 	canvas.addEventListener('mouseleave', onMouseUp, false);
 
 	canvas.addEventListener('click', onClick, false);
+
+	brush.addEventListener('input', function(e) {
+		console.log(brushSize + e.target.value);
+		context.lineWidth = e.target.value;
+	});
 	
 	// Add events for toolbar buttons.
 	$('#red').get(0).addEventListener('click', function(e) { onColorClick(e.target.id); }, false);
