@@ -9,6 +9,7 @@ function init() {
 	context = canvas.getContext('2d');
 	context.lineWidth = 2;
 	var brush = document.getElementById('brushSize');
+	var color = document.getElementById('customColor');
 
 	console.log(brushSize);
 	
@@ -28,7 +29,24 @@ function init() {
 		console.log(brushSize + e.target.value);
 		context.lineWidth = e.target.value;
 	});
+
+		color.addEventListener('change', function(){
+    	onColorClick(this.value);
+	});
 	
+	document.getElementById('eraser').addEventListener('click', onEraser);
+	document.getElementById('clear').addEventListener('click', onClear);
+	window.addEventListener('keydown', function(e) {
+    if(e.key=="c")
+        onClear();
+
+    if(e.key=="e")
+        onEraser();
+
+    if(e.key=="s")
+        onSave();
+});
+
 	// Add events for toolbar buttons.
 	$('#red').get(0).addEventListener('click', function(e) { onColorClick(e.target.id); }, false);
 	$('#pink').get(0).addEventListener('click', function(e) { onColorClick(e.target.id); }, false);
@@ -124,6 +142,7 @@ function onColorClick(color) {
 	
 	// Store color so we can un-highlight it next time around.
 	lastColor = color;
+
 }
 
 function onFill() {
@@ -151,7 +170,27 @@ function onStamp(id) {
 	lastStampId = stampId;	
 }
 
-function onSave() {
-	var img = canvas.toDataURL("image/png");
-	document.write('<img src="' + img + '"/>');
+function onSave()
+{
+    var img = canvas.toDataURL("image/png");
+
+    var link = document.createElement("a");
+
+    link.download =
+    "my-drawing.png";
+
+    link.href = img;
+
+    link.click();
+}
+
+function onEraser()
+{
+    context.strokeStyle =
+    "#FFFFFF";
+}
+
+function onClear()
+{
+	context.clearRect(0, 0, canvas.width, canvas.height);
 }
