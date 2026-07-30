@@ -35,7 +35,18 @@ function init() {
 	});
 	
 	document.getElementById('eraser').addEventListener('click', onEraser);
-	
+	document.getElementById('clear').addEventListener('click', onClear);
+	window.addEventListener('keydown', function(e) {
+    if(e.key=="c")
+        onClear();
+
+    if(e.key=="e")
+        onEraser();
+
+    if(e.key=="s")
+        onSave();
+});
+
 	// Add events for toolbar buttons.
 	$('#red').get(0).addEventListener('click', function(e) { onColorClick(e.target.id); }, false);
 	$('#pink').get(0).addEventListener('click', function(e) { onColorClick(e.target.id); }, false);
@@ -159,13 +170,27 @@ function onStamp(id) {
 	lastStampId = stampId;	
 }
 
-function onSave() {
-	var img = canvas.toDataURL("image/png");
-	document.write('<img src="' + img + '"/>');
+function onSave()
+{
+    var img = canvas.toDataURL("image/png");
+
+    var link = document.createElement("a");
+
+    link.download =
+    "my-drawing.png";
+
+    link.href = img;
+
+    link.click();
 }
 
 function onEraser()
 {
     context.strokeStyle =
     "#FFFFFF";
+}
+
+function onClear()
+{
+	context.clearRect(0, 0, canvas.width, canvas.height);
 }
