@@ -13,7 +13,11 @@ function init() {
 	canvas.height = window.innerHeight - 75;
   
 	//$('#container').get(0).addEventListener('mousemove', onMouseMove, false);
+	canvas.addEventListener('mousedown', onMouseDown, false);
 	canvas.addEventListener('mousemove', onMouseMove, false);
+	canvas.addEventListener('mouseup', onMouseUp, false);
+	canvas.addEventListener('mouseleave', onMouseUp, false);
+
 	canvas.addEventListener('click', onClick, false);
 	
 	// Add events for toolbar buttons.
@@ -53,17 +57,37 @@ function onMouseMove(ev) {
 	}
 	
 	if (!started) {
-		started = true;
+        return;
+    }
 
-		context.beginPath();
-		context.moveTo(x, y);		
-	}
-	else {
-		context.lineTo(x, y);
-		context.stroke();
-	}
+    context.lineTo(x, y);
+    context.stroke();
+
 	
 	$('#stats').text(x + ', ' + y);
+}
+
+function onMouseDown(ev) {
+    var x, y;
+
+    if (ev.layerX >= 0) {
+        x = ev.layerX - 50;
+        y = ev.layerY - 5;
+    }
+    else if (ev.offsetX >= 0) {
+        x = ev.offsetX - 50;
+        y = ev.offsetY - 5;
+    }
+
+    started = true;
+
+    context.beginPath();
+    context.moveTo(x, y);
+}
+
+function onMouseUp()
+{
+    started = false;
 }
 
 function onClick(e) {
