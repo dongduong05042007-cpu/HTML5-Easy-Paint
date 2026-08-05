@@ -12,6 +12,9 @@ var historyStack=[];
 var redoStack=[];
 var textInput;
 var glow=false;
+var autoSave = debounce(function(){
+	saveToLocalStorage();
+},1000);
 
 function init() {
 	canvas = $('#imageView').get(0);
@@ -20,9 +23,20 @@ function init() {
 	var brush = document.getElementById('brushSize');
 	var color = document.getElementById('customColor');
 
-
 	canvas.width  = window.innerWidth - 75;
 	canvas.height = window.innerHeight - 75;
+
+	var savedData = localStorage.getItem("canvas_autosave");
+	
+	if(savedData){
+		var img = new Image();
+		img.src = savedData;
+		
+		img.onload = function(){
+			context.drawImage(img,0,0);
+			saveState();
+		};
+	}
 
 	snapshot=context.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -61,6 +75,7 @@ function init() {
         textInput.style.display="none";
 
         saveState();
+		autoSave();
 
     }
 });
@@ -108,6 +123,11 @@ function init() {
 
 	document.getElementById("glow").addEventListener("change",function(){
 		glow=this.checked;
+	});
+
+	document.getElementById("clearAutoSave").addEventListener("click", function(){
+		localStorage.removeItem("canvas_autosave");
+		alert("Đã xóa dữ liệu Auto Save");
 	});
 
 	brush.addEventListener("input", function(e){
@@ -273,7 +293,10 @@ function onMouseDown(ev) {
 function onMouseUp()
 {
     started = false;
+	
 	saveState(); 
+	
+	autoSave();
 }
 
 function onClick(e) {
@@ -354,13 +377,15 @@ function onSave()
 
 function onEraser()
 {
-    context.strokeStyle =
-    "#FFFFFF";
+    context.strokeStyle = "#FFFFFF";
 }
 
 function onClear()
 {
 	context.clearRect(0, 0, canvas.width, canvas.height);
+
+	saveState();
+	autoSave();
 }
 function saveState(){
 	historyStack.push(
@@ -398,3 +423,24 @@ function redo() {
     );
 
 }
+function saveToLocalStorage() {
+	try {
+		var data = canvas.toDataURL("image/png");
+		localStorage.setItem("canvas_autosave", data);
+	} catch(e) {
+		if (e.name === "QuotaExceededError") {
+			alert("LocalStorage đã đầy. Hãy xóa bớt bản nháp.");
+		} else {
+			console.error(e);
+		}
+	}
+}
+function debounce(func, delay){
+	let timer;
+	return function(){
+		clearTimeout(timer);
+		timer = setTimeout(func, delay);
+	};
+
+}
+
