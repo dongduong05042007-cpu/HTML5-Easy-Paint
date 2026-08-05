@@ -35,6 +35,7 @@ function init() {
 		img.onload = function(){
 			context.drawImage(img,0,0);
 			saveState();
+			autoSave();
 		};
 	}
 
@@ -129,6 +130,8 @@ function init() {
 		localStorage.removeItem("canvas_autosave");
 		alert("Đã xóa dữ liệu Auto Save");
 	});
+	document.getElementById("saveDraft").addEventListener("click", saveDraft);
+	renderDrafts();
 
 	brush.addEventListener("input", function(e){
 		context.lineWidth = e.target.value;
@@ -443,4 +446,79 @@ function debounce(func, delay){
 	};
 
 }
+function getDrafts(){
 
+    return JSON.parse(
+        localStorage.getItem("paint_drafts")
+    ) || [];
+
+}
+function saveDraft(){
+
+    var name=document.getElementById("draftName").value.trim();
+	if(name===""){
+		alert("Vui lòng nhập tên bản nháp");
+		return;
+	}
+	var drafts=getDrafts();
+	var draft={
+		id:Date.now(),
+		name:name,
+		data:canvas.toDataURL("image/png"),
+		updatedAt:new Date().toLocaleString()
+	};
+	drafts.push(draft);
+	localStorage.setItem(
+		"paint_drafts",
+		JSON.stringify(drafts)
+	);
+	renderDrafts();
+	document.getElementById("draftName").value="";
+
+}
+function renderDrafts(){
+
+    var drafts=getDrafts();
+
+    var html="";
+	drafts.forEach(function(d){
+	    html+=`<div>
+		<b>${d.name}</b>
+		${d.updatedAt}
+		<button onclick="openDraft(${d.id})">Mở</button>
+		<button onclick="deleteDraft(${d.id})">Xóa</button>
+		</div>
+        `;
+	});
+	document.getElementById("draftList").innerHTML=html;
+}
+function openDraft(id){
+
+    var drafts=getDrafts();
+
+    var draft=drafts.find(x=>x.id==id);
+	if(!draft)return;
+
+    var img=new Image();
+	img.src=draft.data;
+	img.onload=function(){
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		context.drawImage(img,0,0);
+		saveState();
+		autoSave();
+
+    };
+}
+function deleteDraft(id){
+
+    if(!confirm("Bạn có chắc muốn xóa?"))
+		return;
+		var drafts=getDrafts();
+	drafts=drafts.filter(x=>x.id!=id);
+	localStorage.setItem(
+		"paint_drafts",
+		JSON.stringify(drafts)
+	);
+	renderDrafts();
+	document.getElementById("draftName").value="";
+}
