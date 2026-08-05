@@ -157,6 +157,9 @@ function init() {
 	$('#dog').get(0).addEventListener('click', function(e) { onStamp(e.target.id); }, false);
 	$('#fill').get(0).addEventListener('click', function(e) { onFill(); }, false);
 	$('#save').get(0).addEventListener('click', function(e) { onSave(); }, false);
+
+	document.getElementById("exportProject").addEventListener("click", exportProjects);
+	document.getElementById("importProject").addEventListener("change", importProjects);
 }
 
 function onMouseMove(ev) {
@@ -521,4 +524,80 @@ function deleteDraft(id){
 	);
 	renderDrafts();
 	document.getElementById("draftName").value="";
+}
+function exportProject(){
+
+    var projectData={
+		version:"1.0",
+		width:canvas.width,
+		height:canvas.height,
+		currentImage:
+        canvas.toDataURL("image/png")
+    };
+
+    var json=
+    JSON.stringify(projectData);
+	var blob=
+    new Blob(
+        [json],
+        {
+            type:"application/json"
+        }
+    );
+
+    var url=URL.createObjectURL(blob);
+	var a=document.createElement("a");a.href=url;
+    a.download="project.json";
+	a.click();
+	URL.revokeObjectURL(url);
+
+}
+function importProject(event){
+
+    var file = event.target.files[0];
+
+    if(!file)
+        return;
+
+    var reader = new FileReader();
+
+    reader.onload=function(){
+
+        var project = JSON.parse(reader.result);
+
+        restoreProject(project);
+
+    };
+
+    reader.readAsText(file);
+
+}
+function restoreProject(project){
+
+    var img=new Image();
+
+    img.src=
+    project.currentImage;
+
+    img.onload=function(){
+
+        context.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        context.drawImage(
+            img,
+            0,
+            0
+        );
+
+        saveState();
+
+        autoSave();
+
+    };
+
 }
