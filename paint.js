@@ -23,8 +23,8 @@ function init() {
 	var brush = document.getElementById('brushSize');
 	var color = document.getElementById('customColor');
 
-	canvas.width  = window.innerWidth - 75;
-	canvas.height = window.innerHeight - 75;
+	canvas.width = 900;
+	canvas.height = 600;
 
 	var savedData = localStorage.getItem("canvas_autosave");
 	
@@ -166,12 +166,10 @@ function onMouseMove(ev) {
 
     var x, y;
 	if (ev.layerX >= 0) {
-        x = ev.layerX - 50;
-        y = ev.layerY - 5;
-    }
-    else {
-        x = ev.offsetX - 50;
-        y = ev.offsetY - 5;
+       const rect = canvas.getBoundingClientRect();
+
+		x = ev.clientX - rect.left;
+		y = ev.clientY - rect.top;
     }
 	
 	if (!started)
@@ -269,12 +267,10 @@ function onMouseDown(ev) {
     var x, y;
 
     if (ev.layerX >= 0) {
-        x = ev.layerX - 50;
-        y = ev.layerY - 5;
-    }
-    else {
-        x = ev.offsetX - 50;
-        y = ev.offsetY - 5;
+	const rect = canvas.getBoundingClientRect();
+
+	x = ev.clientX - rect.left;
+	y = ev.clientY - rect.top;
     }
 
     started = true;

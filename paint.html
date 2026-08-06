@@ -1,98 +1,390 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Duong</title>
-    <style type="text/css"><!--
-      #container { position: relative; }
-      #imageView { border: 1px solid #000; }
-	  html, body {
-		width: 100%;
-		height: 100%;
-		margin: 0px;
-	  }
-    --></style>
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js"></script>
-    <script type="text/javascript" src="paint.js"></script>
-    <script type="text/javascript" src="init.js"></script>	
-  </head>
-  <body>
-    <div id="container" style="padding:5px 0px 0px 0px;">
-		<div id="colorToolbar" style="border: 1px solid black; float: left;">
-			<div id="red" style="background:red; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<div id="pink" style="background:pink; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<div id="fuchsia" style="background:fuchsia; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<div id="orange" style="background:orange; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<div id="yellow" style="background:yellow; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<div id="lime" style="background:lime; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<div id="green" style="background:green; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<div id="blue" style="background:blue; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<div id="purple" style="background:purple; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<div id="black" style="background:black; width:50px; height:50px; float:left; border: 1px dashed white;"></div><div style="clear: both;"></div>
-			<div id="white" style="background:white; width:50px; height:50px; float:left;"></div><div style="clear: both;"></div>
-			<input type="color" id="customColor" value="#000000">
-			<hr/>
-			<div id="fill" style="width:50px; height:50px; float:left;"><img src="fill.png" width="50" height="50" /></div><div style="clear: both;"></div>
-			<div id="cat" style="width:50px; height:50px; float:left;"><img id="catImg" src="cat.png" width="50" height="50" /></div><div style="clear: both;"></div>
-			<div id="dog" style="width:50px; height:50px; float:left;"><img id="dogImg" src="dog.png" width="50" height="50" /></div><div style="clear: both;"></div>
-			<div id="dragonfly" style="width:50px; height:50px; float:left;"><img id="dragonFlyImg" src="fly.png" width="50" height="50" /></div><div style="clear: both;"></div>
-			<div id="ladybug" style="width:50px; height:50px; float:left;"><img id="ladyBugImg" src="bug.png" width="50" height="50" /></div><div style="clear: both;"></div>
-			<div id="heart" style="width:50px; height:50px; float:left;"><img id="heartImg" src="heart.png" width="50" height="50" /></div><div style="clear: both;"></div>
-			<div id="save" style="width:50px; height:50px; float:left;">Save</div><div style="clear: both;"></div>
-			<button id="eraser">Eraser</button>
-			<hr/>
-			<button id="clear">Clear</button>
-			
-		</div>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Paint Studio</title>
 
-		<div id="canvasDiv" style="float: left;">
-		  <canvas id="imageView">
-			<p>Unfortunately, your browser is currently unsupported by our web 
-			application.  We are sorry for the inconvenience. Please use one of the 
-			supported browsers listed below, or draw the image you want using an 
-			offline tool.</p>
-			<p>Supported browsers: <a href="http://www.opera.com">Opera</a>, <a 
-			  href="http://www.mozilla.com">Firefox</a>, <a 
-			  href="http://www.apple.com/safari">Safari</a>, and <a 
-			  href="http://www.konqueror.org">Konqueror</a>.</p>
-		  </canvas>		
-		</div>
-		<div id="stats" style="font-size:8pt; padding-left: 50px; float: left;">0 0</div>	
-		<div id="brushSize">
-			<label for="brushSize">Brush Size:</label>
-			<input type="range" id="brushSize" min="1" max="50" value="2">
-			<label> <input type="checkbox" id="fillShape">Fill</label>
-		</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js"></script>
+<script src="paint.js"></script>
+<script src="init.js"></script>
 
-		<div>
-			<select id="shapeTool">
-    			<option value="pen">Pen</option>
-    			<option value="line">Line</option>
-    			<option value="rect">Rectangle</option>
-    			<option value="circle">Circle</option>
-				<option value="text">Text</option>
-			</select>
-		</div>
-		<div>
-			<input type="text" id="textInput" style=" display:none; position:absolute; z-index:1000;" placeholder="Enter text here">
-		</div>
-		
-		<div>
-			<option value="spray">Spray</option><label><input type="checkbox" id="glow">Glow</label>
-		</div>
+<style>
 
-		<div>
-			<button id="clearAutoSave"> Clear Auto-Save </button>
-		</div>
-		<input type="text" id="draftName" placeholder="Tên bản nháp">
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
 
-		<button id="saveDraft">Lưu bản nháp</button>
-		
-		<div id="draftList"></div>
+body{
+    background:#202124;
+    color:white;
+    overflow:hidden;
+}
 
-		<button id="exportProject">Export Project</button><input type="file" id="importProject" accept=".json">
-		
-		<div style="clear: both;"></div>
-		</div>
+#container{
+    display:flex;
+    height:100vh;
+}
 
-  </body>
+/*================ LEFT TOOLBAR ================*/
+
+#colorToolbar{
+
+    width:90px;
+    background:#2b2d31;
+    padding:30px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    box-shadow:4px 0 10px rgba(0,0,0,.4);
+}
+
+/* Color Buttons */
+
+#colorToolbar div[id]{
+
+    width:60px;
+    height:60px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:.2s;
+
+}
+
+#colorToolbar div[id]:hover{
+
+    transform:scale(1.1);
+    border:2px solid white;
+
+}
+
+img{
+
+    width:45px;
+    height:45px;
+    border-radius:8px;
+
+}
+
+input[type=color]{
+
+    width:50px;
+    height:50px;
+    border:none;
+    background:none;
+
+}
+
+/* Buttons */
+
+button{
+
+    width:70px;
+    padding:8px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    color:white;
+    background:#3d4046;
+    transition:.2s;
+
+}
+
+button:hover{
+
+    background:#5b5f68;
+
+}
+
+/*================ MAIN AREA ================*/
+
+#canvasDiv{
+
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#777;
+
+}
+
+#imageView{
+
+    width:900px;
+    height:600px;
+
+    background:white;
+    border-radius:12px;
+    box-shadow:0 0 35px rgba(0,0,0,.55);
+
+}
+
+#canvasDiv{
+
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#777;
+
+}
+
+#imageView{
+
+    width:900px;
+    height:600px;
+
+    background:white;
+    border-radius:12px;
+    box-shadow:0 0 35px rgba(0,0,0,.55);
+
+}
+
+/*================ RIGHT PANEL ================*/
+
+#rightPanel{
+    width:330px;
+    height:100vh;          
+    background:#2d2d2d;
+    color:white;
+    padding:20px;
+    overflow-y:auto;       
+    overflow-x:hidden;
+    box-shadow:-4px 0 15px rgba(0,0,0,.4);
+}
+
+#rightPanel::-webkit-scrollbar{
+    width:8px;
+}
+
+#rightPanel::-webkit-scrollbar-track{
+    background:#2d2d2d;
+}
+
+#rightPanel::-webkit-scrollbar-thumb{
+    background:#666;
+    border-radius:10px;
+}
+
+#rightPanel::-webkit-scrollbar-thumb:hover{
+    background:#888;
+}
+
+.card{
+
+    background:#3b3d42;
+    border-radius:15px;
+    padding:18px;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+
+}
+
+.card h3{
+
+    margin-bottom:10px;
+    font-size:15px;
+
+}
+
+select,
+input[type=text],
+input[type=range]{
+
+    width:100%;
+
+}
+
+#draftList{
+
+    max-height:150px;
+    overflow:auto;
+
+}
+
+.draft-card{
+
+	background:#444;
+
+	padding:12px;
+
+	border-radius:10px;
+
+	margin-bottom:10px;
+
+}
+
+#stats{
+
+    font-size:13px;
+    color:#ddd;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="container">
+
+    <!-- LEFT TOOLBAR -->
+
+    <div id="colorToolbar">
+
+        <div id="red" style="background:red"></div>
+        <div id="pink" style="background:pink"></div>
+        <div id="fuchsia" style="background:fuchsia"></div>
+        <div id="orange" style="background:orange"></div>
+        <div id="yellow" style="background:yellow"></div>
+        <div id="lime" style="background:lime"></div>
+        <div id="green" style="background:green"></div>
+        <div id="blue" style="background:blue"></div>
+        <div id="purple" style="background:purple"></div>
+        <div id="black" style="background:black"></div>
+        <div id="white" style="background:white"></div>
+
+        <input type="color" id="customColor">
+
+        <img id="fill" src="fill.png">
+
+        <img id="catImg" src="cat.png">
+
+        <img id="dogImg" src="dog.png">
+
+        <img id="dragonFlyImg" src="fly.png">
+
+        <img id="ladyBugImg" src="bug.png">
+
+        <img id="heartImg" src="heart.png">
+
+        <button id="eraser">Erase</button>
+
+        <button id="clear">Clear</button>
+
+    </div>
+
+    <!-- CANVAS -->
+
+    <div id="canvasDiv">
+
+        <canvas id="imageView"></canvas>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+
+    <div id="rightPanel">
+
+        <div class="card">
+
+            <h3>Brush</h3>
+
+            Brush Size
+
+            <input type="range" id="brushSize" min="1" max="50" value="2">
+
+            <br><br>
+
+            <label>
+
+                <input type="checkbox" id="fillShape">
+
+                Fill Shape
+
+            </label>
+
+            <br><br>
+
+            <label>
+
+                <input type="checkbox" id="glow">
+
+                Glow Effect
+
+            </label>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Shape Tool</h3>
+
+            <select id="shapeTool">
+
+                <option value="pen">Pen</option>
+                <option value="line">Line</option>
+                <option value="rect">Rectangle</option>
+                <option value="circle">Circle</option>
+                <option value="text">Text</option>
+
+            </select>
+
+            <input
+            type="text"
+            id="textInput"
+            placeholder="Enter Text"
+            style="margin-top:10px;display:none;">
+
+        </div>
+
+        <div class="card">
+
+            <h3>Project</h3>
+
+            <input
+            type="text"
+            id="draftName"
+            placeholder="Project Name">
+
+            <br><br>
+
+            <button id="saveDraft">Save</button>
+
+            <br><br>
+
+            <button id="exportProject">Export</button>
+
+            <br><br>
+
+            <input
+            type="file"
+            id="importProject"
+            accept=".json">
+
+            <br><br>
+
+            <button id="clearAutoSave">
+
+                Clear Auto Save
+
+            </button>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Drafts</h3>
+
+            <div id="draftList"></div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Status</h3>
+
+            <div id="stats">0 0</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
 </html>
