@@ -137,6 +137,50 @@ function init() {
 		context.lineWidth = e.target.value;
 
 });
+	document.getElementById("btnSaveCloud").addEventListener("click", async function () {
+        const title = prompt(
+            "Nhập tên bài vẽ của bạn:",
+            "Bài vẽ mới"
+        );
+
+        if (!title) {
+            return;
+        }
+
+        const btn = document.getElementById("btnSaveCloud");
+
+        btn.disabled = true;
+        btn.innerText = "Đang lưu...";
+
+
+        try {
+
+            const dataUrl = canvas.toDataURL("image/png");
+
+            const result = await ApiService.saveToCloud(
+                title,
+                dataUrl
+            );
+
+            alert(
+                `Đã lưu thành công bài vẽ "${result.title}" lên Cloud!`
+            );
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Lỗi: " + error.message
+            );
+
+        } finally {
+
+            btn.disabled = false;
+            btn.innerText = "Lưu lên Cloud";
+        }
+
+    });
 
 	// Add events for toolbar buttons.
 	$('#red').get(0).addEventListener('click', function(e) { onColorClick(e.target.id); }, false);
@@ -150,16 +194,16 @@ function init() {
 	$('#purple').get(0).addEventListener('click', function(e) { onColorClick(e.target.id); }, false);
 	$('#black').get(0).addEventListener('click', function(e) { onColorClick(e.target.id); }, false);
 	$('#white').get(0).addEventListener('click', function(e) { onColorClick(e.target.id); }, false);
-	$('#cat').get(0).addEventListener('click', function(e) { onStamp(e.target.id); }, false);
-	$('#dragonfly').get(0).addEventListener('click', function(e) { onStamp(e.target.id); }, false);
-	$('#ladybug').get(0).addEventListener('click', function(e) { onStamp(e.target.id); }, false);
-	$('#heart').get(0).addEventListener('click', function(e) { onStamp(e.target.id); }, false);
-	$('#dog').get(0).addEventListener('click', function(e) { onStamp(e.target.id); }, false);
-	$('#fill').get(0).addEventListener('click', function(e) { onFill(); }, false);
-	$('#save').get(0).addEventListener('click', function(e) { onSave(); }, false);
+	$('#catImg').get(0).addEventListener('click', function(e) {onStamp(e.target.id);}, false);
+	$('#dragonFlyImg').get(0).addEventListener('click', function(e) {onStamp(e.target.id);}, false);
+	$('#ladyBugImg').get(0).addEventListener('click', function(e) {onStamp(e.target.id);}, false);
+	$('#heartImg').get(0).addEventListener('click', function(e) {onStamp(e.target.id);}, false);
+	$('#dogImg').get(0).addEventListener('click', function(e) {onStamp(e.target.id);}, false);
 
-	document.getElementById("exportProject").addEventListener("click", exportProjects);
-	document.getElementById("importProject").addEventListener("change", importProjects);
+	document.getElementById("exportProject").addEventListener("click", exportProject);
+    document.getElementById("importProject").addEventListener("change", importProject);
+	document.getElementById("btnOpenCloud").addEventListener("click", openCloudModal);
+	document.getElementById("btnCloseCloud").addEventListener("click",closeCloudModal);
 }
 
 function onMouseMove(ev) {
@@ -199,36 +243,35 @@ function onMouseMove(ev) {
 
     }
 
-    else if(currentTool=="rect"){
-		if(fillShape){
-			context.fillRect(
-                startX,
-                startY,
-                x-startX,
-                y-startY
-            );
+    else if(currentTool=="rect") {
 
-        }
+    if(fillShape) {
 
-        else{
+        context.fillRect(
+            startX,
+            startY,
+            x - startX,
+            y - startY
+        );
 
-            context.strokeRect(
-                startX,
-                startY,
-                x-startX,
-                y-startY
-            );
+    } else {
 
-        }
+        context.strokeRect(
+            startX,
+            startY,
+            x - startX,
+            y - startY
+        );
 
     }
+}
 
-    else if(currentTool=="circle"){
+    else if(currentTool=="circle") {
 
-    var dx=x-startX;
-    var dy=y-startY;
+    var dx = x - startX;
+    var dy = y - startY;
 
-    var radius=Math.sqrt(dx*dx+dy*dy);
+    var radius = Math.sqrt(dx * dx + dy * dy);
 
     context.beginPath();
 
@@ -237,15 +280,14 @@ function onMouseMove(ev) {
         startY,
         radius,
         0,
-        2*Math.PI
+        2 * Math.PI
     );
 
-    if(fillShape){
+    if(fillShape) {
         context.fill();
-    }else{
+    } else {
         context.stroke();
     }
-
 }
 
 	else if(currentTool=="spray"){
@@ -317,25 +359,23 @@ function onClick(e) {
 }
 
 function onColorClick(color) {
-	// Start a new path to begin drawing in a new color.
-	context.closePath();
-	context.beginPath();
-	
-	// Select the new color.
-	context.strokeStyle = color;
-	
-	// Highlight selected color.
-	var borderColor = 'white';
-	if (color == 'white' || color == 'yellow') {
-		borderColor = 'black';
-	}
-	
-	$('#' + lastColor).css("border", "0px dashed white");
-	$('#' + color).css("border", "1px dashed " + borderColor);
-	
-	// Store color so we can un-highlight it next time around.
-	lastColor = color;
 
+    context.closePath();
+    context.beginPath();
+
+    context.strokeStyle = color;
+    context.fillStyle = color;
+
+    var borderColor = 'white';
+
+    if (color == 'white' || color == 'yellow') {
+        borderColor = 'black';
+    }S
+
+    $('#' + lastColor).css("border", "0px dashed white");
+    $('#' + color).css("border", "1px dashed " + borderColor);
+
+    lastColor = color;
 }
 
 function onFill() {
@@ -596,4 +636,203 @@ function restoreProject(project){
 
     };
 
+}
+
+function restoreProject(project){
+
+    var img = new Image();
+
+    img.src = project.currentImage;
+
+    img.onload = function(){
+
+        context.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        context.drawImage(
+            img,
+            0,
+            0
+        );
+
+        saveState();
+        autoSave();
+
+    };
+}
+
+function openCloudModal() {
+
+    var modal = document.getElementById("cloudModal");
+
+    modal.style.display = "block";
+
+    renderCloudModal();
+}
+
+async function loadAndDraw(id) {
+
+    try {
+
+        console.log("Đang mở bài vẽ ID:", id);
+
+        if (!id || id === "undefined") {
+            alert("ID bài vẽ không hợp lệ!");
+            console.error("ID bị undefined:", id);
+            return;
+        }
+
+        var drawing = await ApiService.getById(id);
+
+        console.log("Dữ liệu bài vẽ:", drawing);
+
+        if (!drawing) {
+            alert("Không tìm thấy bài vẽ!");
+            return;
+        }
+
+        var imageData =
+            drawing.ImageData ||
+            drawing.imageData;
+
+        if (!imageData) {
+            alert("Bài vẽ không có dữ liệu hình ảnh!");
+            console.error("Không tìm thấy ImageData:", drawing);
+            return;
+        }
+
+        var img = new Image();
+
+        img.onload = function () {
+
+            context.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            context.drawImage(
+                img,
+                0,
+                0
+            );
+
+            historyStack = [];
+            redoStack = [];
+
+            historyStack.push(
+                context.getImageData(
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                )
+            );
+
+            autoSave();
+
+            closeCloudModal();
+
+            alert("Đã mở bài vẽ thành công!");
+
+        };
+
+        img.onerror = function () {
+
+            console.error(
+                "Không thể load Image:",
+                imageData
+            );
+
+            alert("Không thể hiển thị hình ảnh!");
+
+        };
+
+        img.src = imageData;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Lỗi mở bài vẽ:",
+            error
+        );
+
+        alert(
+            "Không thể mở bài vẽ: " +
+            error.message
+        );
+
+    }
+}
+
+
+function closeCloudModal() {
+
+    var modal = document.getElementById("cloudModal");
+
+    modal.style.display = "none";
+}
+
+
+async function renderCloudModal() {
+
+    var list = document.getElementById("cloudDrawingList");
+
+    list.innerHTML = "<p>Đang tải...</p>";
+
+    try {
+
+        var drawings = await ApiService.getList();
+
+        console.log("Danh sách Cloud:", drawings);
+
+        if (!drawings || drawings.length === 0) {
+
+            list.innerHTML =
+                "<p>Chưa có bài vẽ nào trên Cloud.</p>";
+
+            return;
+        }
+
+        var html = "";
+
+        drawings.forEach(function (drawing) {
+            
+            console.log("Một bài vẽ:", drawing);
+            
+            var id = drawing.Id || drawing.id;
+            var title = drawing.Title || drawing.title;
+            
+            html += `
+            <div class="cloud-drawing-item" onclick="loadAndDraw(${id})">
+            <strong>
+                ${title}
+            </strong>
+
+            <br>
+
+            <small>
+                ID: ${id}
+            </small>
+        </div>
+    `;
+});
+        list.innerHTML = html;
+
+    } catch (error) {
+
+        console.error(
+            "Lỗi lấy danh sách Cloud:",
+            error
+        );
+
+        list.innerHTML =
+            "<p>Không thể tải danh sách bài vẽ.</p>";
+    }
 }
