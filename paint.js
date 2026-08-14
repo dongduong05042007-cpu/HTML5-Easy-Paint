@@ -15,11 +15,87 @@ var glow=false;
 var autoSave = debounce(function(){
 	saveToLocalStorage();
 },1000);
+var currentBrush = "pen";
+var brushOpacity = 1;
+var brushSizeValue = 2;
 
 function init() {
 	canvas = $('#imageView').get(0);
 	context = canvas.getContext("2d");
 	context.lineWidth = 2;
+
+var brushType = document.getElementById("brushType");
+var brushSize = document.getElementById("brushSize");
+var brushOpacity = document.getElementById("brushOpacity");
+var brushSizeValueElement = document.getElementById("brushSizeValue");
+var brushOpacityValueElement = document.getElementById("brushOpacityValue");
+
+if (brushType) {
+
+    brushType.addEventListener(
+        "change",
+        function () {
+
+            currentBrush =
+                this.value;
+
+            applyBrush();
+
+        }
+    );
+
+}
+
+if (brushSize) {
+
+    brushSize.addEventListener(
+        "input",
+        function () {
+
+            brushSizeValue =
+                Number(this.value);
+
+            if (brushSizeValueElement) {
+
+                brushSizeValueElement.innerText =
+                    "Size: " +
+                    this.value;
+
+            }
+
+            applyBrush();
+
+        }
+    );
+
+}
+
+if (brushOpacity) {
+
+    brushOpacity.addEventListener(
+        "input",
+        function () {
+
+            brushOpacity =
+                Number(this.value) / 100;
+
+            if (brushOpacityValueElement) {
+
+                brushOpacityValueElement.innerText =
+                    "Opacity: " +
+                    this.value +
+                    "%";
+
+            }
+
+            applyBrush();
+
+        }
+    );
+
+}
+applyBrush();
+
 	var brush = document.getElementById('brushSize');
 	var color = document.getElementById('customColor');
 
@@ -204,7 +280,10 @@ function init() {
     document.getElementById("importProject").addEventListener("change", importProject);
 	document.getElementById("btnOpenCloud").addEventListener("click", openCloudModal);
 	document.getElementById("btnCloseCloud").addEventListener("click",closeCloudModal);
+
+    loadDrawingFromCloud();
 }
+
 
 function onMouseMove(ev) {
 
@@ -236,7 +315,9 @@ function onMouseMove(ev) {
     }
 
     else if(currentTool=="line"){
-		context.beginPath();
+		
+        applyBrush();
+        context.beginPath();
 		context.moveTo(startX,startY);
 		context.lineTo(x,y);
 		context.stroke();
@@ -370,7 +451,7 @@ function onColorClick(color) {
 
     if (color == 'white' || color == 'yellow') {
         borderColor = 'black';
-    }S
+    }
 
     $('#' + lastColor).css("border", "0px dashed white");
     $('#' + color).css("border", "1px dashed " + borderColor);
@@ -638,33 +719,6 @@ function restoreProject(project){
 
 }
 
-function restoreProject(project){
-
-    var img = new Image();
-
-    img.src = project.currentImage;
-
-    img.onload = function(){
-
-        context.clearRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-        context.drawImage(
-            img,
-            0,
-            0
-        );
-
-        saveState();
-        autoSave();
-
-    };
-}
-
 function openCloudModal() {
 
     var modal = document.getElementById("cloudModal");
@@ -835,4 +889,400 @@ async function renderCloudModal() {
         list.innerHTML =
             "<p>Không thể tải danh sách bài vẽ.</p>";
     }
+}
+
+const urlParams =
+    new URLSearchParams(window.location.search);
+
+const drawingId = urlParams.get("id");
+
+console.log("ID bài vẽ:", drawingId);
+
+async function loadDrawingFromCloud() {
+
+    console.log("Đang kiểm tra ID bài vẽ trong URL...");
+
+    const urlParams =
+        new URLSearchParams(window.location.search);
+
+    const drawingId =
+        urlParams.get("id");
+
+    console.log("ID bài vẽ:", drawingId);
+
+    if (!drawingId) {
+
+        console.log(
+            "Không có ID → mở bảng vẽ mới."
+        );
+
+        return;
+    }
+
+    try {
+
+        console.log(
+            "Đang tải bài vẽ ID:",
+            drawingId
+        );
+
+        const drawing =
+            await ApiService.getById(drawingId);
+
+        console.log(
+            "Bài vẽ lấy được:",
+            drawing
+        );
+
+        if (!drawing) {
+
+            alert("Không tìm thấy bài vẽ!");
+
+            return;
+        }
+
+        const imageData =
+            drawing.ImageData ||
+            drawing.imageData ||
+            drawing.image_data;
+
+        if (!imageData) {
+
+            alert(
+                "Bài vẽ không có dữ liệu hình ảnh!"
+            );
+
+            return;
+        }
+
+        const image =
+            new Image();
+
+        image.onload = function () {
+
+            context.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            context.drawImage(
+                image,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            historyStack = [];
+            redoStack = [];
+
+            historyStack.push(
+                context.getImageData(
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                )
+            );
+
+            console.log(
+                "Đã vẽ bài ID " +
+                drawingId +
+                " lên Canvas."
+            );
+
+        };
+
+        image.onerror = function () {
+
+            console.error(
+                "Không thể tải hình ảnh:",
+                imageData
+            );
+
+            alert(
+                "Không thể hiển thị bài vẽ!"
+            );
+
+        };
+
+        image.src = imageData;
+
+    } catch (error) {
+
+        console.error(
+            "Lỗi tải bài vẽ:",
+            error
+        );
+
+        alert(
+            "Không thể tải bài vẽ!"
+        );
+    }
+}
+
+function setBrush() {
+
+    var brushType =
+        document.getElementById("brushType");
+
+    var brushSize =
+        document.getElementById("brushSize");
+
+    var opacity =
+        document.getElementById("brushOpacity");
+
+
+    if (brushType) {
+
+        currentBrush =
+            brushType.value;
+
+    }
+
+
+    if (brushSize) {
+
+        brushSizeValue =
+            Number(brushSize.value);
+
+    }
+
+
+    if (opacity) {
+
+        brushOpacity =
+            Number(opacity.value) / 100;
+
+    }
+
+
+    applyBrush();
+
+}
+
+function applyBrush() {
+
+    if (!context) {
+        return;
+    }
+
+
+    context.globalAlpha =
+        brushOpacity;
+
+
+    context.lineWidth =
+        brushSizeValue;
+
+
+    context.lineCap =
+        "round";
+
+    context.lineJoin =
+        "round";
+
+    context.shadowBlur = 0;
+
+    context.shadowColor =
+        "transparent";
+
+    if (currentBrush === "pen") {
+
+        context.globalAlpha =
+            brushOpacity;
+
+        context.lineWidth =
+            brushSizeValue;
+
+        context.lineCap =
+            "round";
+
+        context.setLineDash([]);
+
+    }
+
+    else if (currentBrush === "pencil") {
+
+        context.globalAlpha =
+            brushOpacity * 0.65;
+
+        context.lineWidth =
+            Math.max(
+                1,
+                brushSizeValue * 0.6
+            );
+
+        context.lineCap =
+            "round";
+
+        context.setLineDash([]);
+
+    }
+
+    else if (currentBrush === "marker") {
+
+        context.globalAlpha =
+            brushOpacity * 0.65;
+
+        context.lineWidth =
+            brushSizeValue * 2;
+
+        context.lineCap =
+            "square";
+
+        context.setLineDash([]);
+
+    }
+
+    else if (currentBrush === "crayon") {
+
+        context.globalAlpha =
+            brushOpacity * 0.8;
+
+        context.lineWidth =
+            brushSizeValue * 1.5;
+
+        context.lineCap =
+            "round";
+
+        context.setLineDash([]);
+
+    }
+
+    else if (currentBrush === "airbrush") {
+
+        context.globalAlpha =
+            brushOpacity * 0.15;
+
+        context.lineWidth =
+            brushSizeValue * 4;
+
+        context.lineCap =
+            "round";
+
+        context.setLineDash([]);
+
+    }
+
+    else if (currentBrush === "spray") {
+
+        context.globalAlpha =
+            brushOpacity * 0.5;
+
+        context.lineWidth =
+            1;
+
+        context.lineCap =
+            "round";
+
+        context.setLineDash([]);
+
+    }
+
+    else if (currentBrush === "neon") {
+
+        context.globalAlpha =
+            brushOpacity;
+
+        context.lineWidth =
+            brushSizeValue;
+
+        context.lineCap =
+            "round";
+
+        context.setLineDash([]);
+
+        context.shadowBlur =
+            brushSizeValue * 2;
+
+        context.shadowColor =
+            context.strokeStyle;
+
+    }
+
+    else if (currentBrush === "calligraphy") {
+
+        context.globalAlpha =
+            brushOpacity;
+
+        context.lineWidth =
+            brushSizeValue * 2;
+
+        context.lineCap =
+            "square";
+
+        context.lineJoin =
+            "miter";
+
+        context.setLineDash([]);
+
+    }
+
+}
+
+function sprayBrush(x, y) {
+
+    var radius =
+        brushSizeValue * 2;
+
+    var amount =
+        Math.max(
+            10,
+            brushSizeValue * 2
+        );
+
+
+    context.save();
+
+    context.globalAlpha =
+        brushOpacity * 0.5;
+
+
+    for (
+        var i = 0;
+        i < amount;
+        i++
+    ) {
+
+        var angle =
+            Math.random() *
+            Math.PI * 2;
+
+        var distance =
+            Math.random() *
+            radius;
+
+
+        var px =
+            x +
+            Math.cos(angle) *
+            distance;
+
+
+        var py =
+            y +
+            Math.sin(angle) *
+            distance;
+
+
+        context.beginPath();
+
+        context.arc(
+            px,
+            py,
+            Math.random() * 1.5 + 0.5,
+            0,
+            Math.PI * 2
+        );
+
+        context.fill();
+
+    }
+
+
+    context.restore();
+
 }

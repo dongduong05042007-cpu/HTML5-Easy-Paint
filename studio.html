@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>Paint Studio</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #ddd;
+            font-family: Arial, sans-serif;
+        }
+
+        #imageView {
+            display: block;
+            background: white;
+            margin: 20px auto;
+            border: 1px solid #999;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+
+            padding: 10px 15px;
+
+            border: none;
+            border-radius: 6px;
+
+            background: #333;
+            color: white;
+
+            cursor: pointer;
+        }
+
+        /* Các phần tử này dùng để tương thích
+           với paint.js cũ */
+
+        #compatibility {
+            display: none;
+        }
+
+        .delete-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9999;
+}
+
+.delete-modal-content {
+    width: 400px;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    color: #222;
+    text-align: center;
+}
+
+.delete-modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         NÚT QUAY LẠI GALLERY
+    ========================== -->
+
+    <button
+        class="back-btn"
+        onclick="window.location.href='index.html'">
+
+        ← Gallery
+
+    </button>
+
+
+    <!-- =========================
+         CANVAS
+    ========================== -->
+
+    <canvas
+        id="imageView"
+        width="900"
+        height="600">
+    </canvas>
+
+
+    <!-- =====================================================
+         CÁC ELEMENT ẨN ĐỂ paint.js KHÔNG BỊ LỖI
+    ====================================================== -->
+
+    <div id="compatibility">
+
+        <!-- Brush -->
+        <input
+            type="range"
+            id="brushSize"
+            value="2"
+            min="1"
+            max="50">
+
+
+        <!-- Color -->
+        <input
+            type="color"
+            id="customColor"
+            value="#000000">
+
+
+        <!-- Text -->
+        <input
+            type="text"
+            id="textInput">
+
+
+        <!-- Tool buttons -->
+        <button id="eraser"></button>
+        <button id="clear"></button>
+
+
+        <!-- Shape -->
+        <select id="shapeTool">
+            <option value="pen">Pen</option>
+            <option value="line">Line</option>
+            <option value="rect">Rectangle</option>
+            <option value="circle">Circle</option>
+            <option value="spray">Spray</option>
+            <option value="text">Text</option>
+        </select>
+
+
+        <input
+            type="checkbox"
+            id="fillShape">
+
+
+        <input
+            type="checkbox"
+            id="glow">
+
+
+        <!-- Auto save -->
+        <button id="clearAutoSave"></button>
+
+
+        <!-- Draft -->
+        <button id="saveDraft"></button>
+
+        <input
+            type="text"
+            id="draftName">
+
+        <div id="draftList"></div>
+
+
+        <!-- Cloud -->
+        <button id="btnSaveCloud">
+            Lưu lên Cloud
+        </button>
+
+        <button id="btnOpenCloud">
+            Mở Cloud
+        </button>
+
+        <button id="btnCloseCloud">
+            Đóng
+        </button>
+
+
+        <!-- Export / Import -->
+        <button id="exportProject"></button>
+
+        <input
+            type="file"
+            id="importProject">
+
+
+        <!-- Stats -->
+        <span id="stats"></span>
+
+
+        <!-- =====================
+             COLORS
+        ====================== -->
+
+        <button id="red"></button>
+        <button id="pink"></button>
+        <button id="fuchsia"></button>
+        <button id="orange"></button>
+        <button id="yellow"></button>
+        <button id="lime"></button>
+        <button id="green"></button>
+        <button id="blue"></button>
+        <button id="purple"></button>
+        <button id="black"></button>
+        <button id="white"></button>
+
+
+        <!-- =====================
+             STAMPS
+        ====================== -->
+
+        <img
+            id="catImg"
+            src="cat.png">
+
+        <img
+            id="dragonFlyImg"
+            src="fly.png">
+
+        <img
+            id="ladyBugImg"
+            src="bug.png">
+
+        <img
+            id="heartImg"
+            src="heart.png">
+
+        <img
+            id="dogImg"
+            src="dog.png">
+
+
+        <!-- =====================
+             CLOUD MODAL
+        ====================== -->
+
+        <div id="cloudModal">
+
+            <div id="cloudDrawingList"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         JQUERY
+         PHẢI ĐẶT TRƯỚC paint.js
+    ====================================================== -->
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script src="apiService.js"></script>
+
+    <script src="paint.js"></script>
+
+</body>
+
+</html>

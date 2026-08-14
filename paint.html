@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Paint Studio</title>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js"></script>
 <script src="apiService.js"></script>
 <script src="paint.js"></script>
 <script src="init.js"></script>
@@ -306,6 +306,60 @@ input[type=range]{
 
     background: #e9e9e9;
 }
+/* BRUSH PANEL */
+
+#brushType {
+
+    width:100%;
+
+    padding:10px;
+
+    margin-top:8px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#202124;
+
+    color:white;
+
+    font-size:14px;
+
+    cursor:pointer;
+
+}
+
+
+#brushType:hover {
+
+    background:#35363a;
+
+}
+
+
+#brushSize,
+#brushOpacity {
+
+    width:100%;
+
+    cursor:pointer;
+
+}
+
+
+#brushSizeValue,
+#brushOpacityValue {
+
+    text-align:right;
+
+    font-size:12px;
+
+    color:#bbb;
+
+    margin-top:4px;
+
+}
 
 </style>
 
@@ -367,33 +421,124 @@ input[type=range]{
 
         <div class="card">
 
-            <h3>Brush</h3>
+    <h3>🖌️ Brush</h3>
 
-            Brush Size
+    <!-- LOẠI CỌ -->
+    <label for="brushType">
+        Brush Type
+    </label>
 
-            <input type="range" id="brushSize" min="1" max="50" value="2">
+    <select id="brushType">
 
-            <br><br>
+        <option value="pen">
+            🖊️ Pen
+        </option>
 
-            <label>
+        <option value="pencil">
+            ✏️ Pencil
+        </option>
 
-                <input type="checkbox" id="fillShape">
+        <option value="marker">
+            🖌️ Marker
+        </option>
 
-                Fill Shape
+        <option value="crayon">
+            🖍️ Crayon
+        </option>
 
-            </label>
+        <option value="airbrush">
+            🌫️ Airbrush
+        </option>
 
-            <br><br>
+        <option value="spray">
+            💨 Spray
+        </option>
 
-            <label>
+        <option value="neon">
+            ✨ Neon
+        </option>
 
-                <input type="checkbox" id="glow">
+        <option value="calligraphy">
+            🖋️ Calligraphy
+        </option>
 
-                Glow Effect
+    </select>
 
-            </label>
+    <br><br>
 
-        </div>
+
+    <!-- KÍCH THƯỚC CỌ -->
+
+    <label for="brushSize">
+        Brush Size
+    </label>
+
+    <input
+        type="range"
+        id="brushSize"
+        min="1"
+        max="50"
+        value="2"
+    >
+
+    <div id="brushSizeValue">
+        Size: 2
+    </div>
+
+    <br>
+
+
+    <!-- ĐỘ MỜ -->
+
+    <label for="brushOpacity">
+        Opacity
+    </label>
+
+    <input
+        type="range"
+        id="brushOpacity"
+        min="10"
+        max="100"
+        value="100"
+    >
+
+    <div id="brushOpacityValue">
+        Opacity: 100%
+    </div>
+
+    <br><br>
+
+
+    <!-- FILL -->
+
+    <label>
+
+        <input
+            type="checkbox"
+            id="fillShape"
+        >
+
+        Fill Shape
+
+    </label>
+
+    <br><br>
+
+
+    <!-- GLOW -->
+
+    <label>
+
+        <input
+            type="checkbox"
+            id="glow"
+        >
+
+        Glow Effect
+
+    </label>
+
+</div>
 
         <div class="card">
 

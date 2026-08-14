@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Paint Gallery</title>
+
+    <style>
+
+        /* =====================================================
+           RESET
+        ===================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+
+        /* =====================================================
+           BODY
+        ===================================================== */
+
+        body {
+
+            background: #202124;
+
+            color: white;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+        }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .gallery-header {
+
+            height: 90px;
+
+            padding: 0 45px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            background: #2b2d31;
+
+            border-bottom: 1px solid #3d4046;
+
+            box-shadow:
+                0 4px 15px rgba(0, 0, 0, 0.25);
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 100;
+
+        }
+
+
+        /* Tiêu đề */
+
+        .gallery-title {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+        }
+
+
+        .gallery-title-icon {
+
+            width: 48px;
+
+            height: 48px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #ffffff;
+
+            font-size: 28px;
+
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.25);
+
+        }
+
+
+        .gallery-title h1 {
+
+            margin: 0;
+
+            font-size: 32px;
+
+            font-weight: 700;
+
+            letter-spacing: 0.3px;
+
+        }
+
+
+        .gallery-subtitle {
+
+            margin-top: 4px;
+
+            color: #aeb1b7;
+
+            font-size: 14px;
+
+        }
+
+
+        /* =====================================================
+           NEW DRAWING BUTTON
+        ===================================================== */
+
+        .new-drawing-button {
+
+            border: none;
+
+            border-radius: 8px;
+
+            padding: 13px 22px;
+
+            background: #4caf50;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+
+        }
+
+
+        .new-drawing-button:hover {
+
+            background: #43a047;
+
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 6px 15px rgba(76, 175, 80, 0.3);
+
+        }
+
+
+        .new-drawing-button:active {
+
+            transform: translateY(0);
+
+        }
+
+
+        /* =====================================================
+           PAGE CONTENT
+        ===================================================== */
+
+        main {
+
+            max-width: 1400px;
+
+            margin: 0 auto;
+
+            padding: 35px 45px 60px;
+
+        }
+
+
+        /* =====================================================
+           GALLERY TOP
+        ===================================================== */
+
+        .gallery-top {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .gallery-heading {
+
+            margin: 0;
+
+            font-size: 24px;
+
+            color: #ffffff;
+
+        }
+
+
+        .gallery-count {
+
+            color: #aeb1b7;
+
+            font-size: 14px;
+
+        }
+
+
+        /* =====================================================
+           LOADING
+        ===================================================== */
+
+        #loading {
+
+            text-align: center;
+
+            padding: 80px 20px;
+
+            color: #bfc1c5;
+
+            font-size: 17px;
+
+        }
+
+
+        /* =====================================================
+           GALLERY GRID
+        ===================================================== */
+
+        #gallery {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap: 25px;
+
+        }
+
+
+        /* =====================================================
+           DRAWING CARD
+        ===================================================== */
+
+        .drawing-card {
+
+            overflow: hidden;
+
+            background: #ffffff;
+
+            color: #202124;
+
+            border-radius: 14px;
+
+            border: 1px solid #dedede;
+
+            box-shadow:
+                0 5px 18px rgba(0, 0, 0, 0.18);
+
+            transition:
+                transform 0.25s ease,
+                box-shadow 0.25s ease;
+
+        }
+
+
+        .drawing-card:hover {
+
+            transform: translateY(-5px);
+
+            box-shadow:
+                0 12px 30px rgba(0, 0, 0, 0.3);
+
+        }
+
+
+        /* =====================================================
+           THUMBNAIL
+        ===================================================== */
+
+        .drawing-card img {
+
+            display: block;
+
+            width: 100%;
+
+            height: 240px;
+
+            object-fit: contain;
+
+            background: #f1f1f1;
+
+            border-bottom: 1px solid #e5e5e5;
+
+        }
+
+
+        /* =====================================================
+           CARD CONTENT
+        ===================================================== */
+
+        .drawing-info {
+
+            padding: 18px 18px 16px;
+
+        }
+
+
+        .drawing-title {
+
+            margin: 0 0 8px;
+
+            font-size: 19px;
+
+            font-weight: 700;
+
+            color: #222;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+        }
+
+
+        .drawing-id {
+
+            margin: 0 0 5px;
+
+            color: #6d737c;
+
+            font-size: 14px;
+
+        }
+
+
+        .drawing-date {
+
+            margin: 0;
+
+            color: #8a8f98;
+
+            font-size: 13px;
+
+        }
+
+
+        /* =====================================================
+           CARD BUTTONS
+        ===================================================== */
+
+        .drawing-actions {
+
+            display: flex;
+
+            gap: 10px;
+
+            padding: 0 18px 18px;
+
+        }
+
+
+        .drawing-actions button {
+
+            flex: 1;
+
+            border: none;
+
+            border-radius: 7px;
+
+            padding: 11px 10px;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.15s ease,
+                opacity 0.15s ease;
+
+        }
+
+
+        .drawing-actions button:hover {
+
+            transform: translateY(-1px);
+
+            opacity: 0.9;
+
+        }
+
+
+        /* Nút mở */
+
+        .open-button {
+
+            background: #2196f3;
+
+            color: white;
+
+        }
+
+
+        /* Nút xóa */
+
+        .delete-button {
+
+            background: #f44336;
+
+            color: white;
+
+        }
+
+
+        /* =====================================================
+           EMPTY GALLERY
+        ===================================================== */
+
+        .empty-gallery {
+
+            grid-column: 1 / -1;
+
+            text-align: center;
+
+            padding: 80px 20px;
+
+            background: #2b2d31;
+
+            border: 1px dashed #555b64;
+
+            border-radius: 14px;
+
+            color: #bfc1c5;
+
+        }
+
+
+        .empty-gallery-icon {
+
+            font-size: 55px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .empty-gallery h2 {
+
+            margin: 0 0 8px;
+
+            color: white;
+
+        }
+
+
+        .empty-gallery p {
+
+            margin: 0;
+
+            color: #aeb1b7;
+
+        }
+
+
+        /* =====================================================
+           DELETE MODAL
+        ===================================================== */
+
+        .delete-modal {
+
+            display: none;
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(0, 0, 0, 0.7);
+
+            align-items: center;
+
+            justify-content: center;
+
+            z-index: 9999;
+
+            padding: 20px;
+
+        }
+
+
+        .delete-modal-content {
+
+            width: 420px;
+
+            max-width: 100%;
+
+            background: #2b2d31;
+
+            color: white;
+
+            padding: 30px;
+
+            border-radius: 15px;
+
+            text-align: center;
+
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.5);
+
+            border: 1px solid #454951;
+
+        }
+
+
+        .delete-modal-content h2 {
+
+            margin-top: 0;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .delete-modal-content p {
+
+            color: #bfc1c5;
+
+            line-height: 1.5;
+
+        }
+
+
+        .delete-modal-buttons {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 12px;
+
+            margin-top: 25px;
+
+        }
+
+
+        .delete-modal-buttons button {
+
+            min-width: 110px;
+
+            padding: 11px 20px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+        }
+
+
+        #cancelDelete {
+
+            background: #555a62;
+
+            color: white;
+
+        }
+
+
+        #confirmDelete {
+
+            background: #f44336;
+
+            color: white;
+
+        }
+
+
+        #cancelDelete:hover {
+
+            background: #666c75;
+
+        }
+
+
+        #confirmDelete:hover {
+
+            background: #d9362e;
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1100px) {
+
+            #gallery {
+
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+
+            }
+
+        }
+
+
+        @media (max-width: 700px) {
+
+            .gallery-header {
+
+                height: auto;
+
+                min-height: 80px;
+
+                padding: 15px 20px;
+
+                gap: 15px;
+
+            }
+
+
+            .gallery-title h1 {
+
+                font-size: 23px;
+
+            }
+
+
+            .gallery-title-icon {
+
+                width: 40px;
+
+                height: 40px;
+
+                font-size: 23px;
+
+            }
+
+
+            .gallery-subtitle {
+
+                display: none;
+
+            }
+
+
+            .new-drawing-button {
+
+                padding: 10px 14px;
+
+                font-size: 14px;
+
+            }
+
+
+            main {
+
+                padding: 25px 15px 40px;
+
+            }
+
+
+            #gallery {
+
+                grid-template-columns: 1fr;
+
+            }
+
+
+            .drawing-card img {
+
+                height: 220px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="gallery-header">
+
+        <div class="gallery-title">
+
+            <div class="gallery-title-icon">
+                🎨
+            </div>
+
+            <div>
+
+                <h1>Paint Gallery</h1>
+
+                <div class="gallery-subtitle">
+                    Quản lý và mở các bản vẽ của bạn
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="new-drawing-button"
+            onclick="newDrawing()">
+
+            ＋ Bản vẽ mới
+
+        </button>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main>
+
+
+        <div class="gallery-top">
+
+            <h2 class="gallery-heading">
+                Bản vẽ của tôi
+            </h2>
+
+            <span
+                id="galleryCount"
+                class="gallery-count">
+
+                Đang tải...
+
+            </span>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div id="loading">
+
+            🎨 Đang tải bài vẽ...
+
+        </div>
+
+
+        <!-- GALLERY -->
+
+        <div id="gallery">
+
+        </div>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         DELETE MODAL
+    ====================================================== -->
+
+    <div
+        id="deleteModal"
+        class="delete-modal">
+
+
+        <div class="delete-modal-content">
+
+            <h2>
+                🗑️ Xác nhận xóa
+            </h2>
+
+
+            <p>
+
+                Bạn có chắc chắn muốn xóa
+                bài vẽ này không?
+
+            </p>
+
+
+            <div class="delete-modal-buttons">
+
+
+                <button
+                    id="cancelDelete">
+
+                    Hủy
+
+                </button>
+
+
+                <button
+                    id="confirmDelete">
+
+                    Xóa
+
+                </button>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="apiService.js"></script>
+
+    <script src="gallery.js"></script>
+
+
+    <script>
+
+        function newDrawing() {
+
+            window.location.href = "paint.html";
+
+        }
+
+
+        /*
+         * Cho phép đóng modal khi click ra ngoài
+         */
+
+        const deleteModal =
+            document.getElementById("deleteModal");
+
+
+        if (deleteModal) {
+
+            deleteModal.addEventListener(
+                "click",
+                function(event) {
+
+                    if (
+                        event.target === deleteModal
+                    ) {
+
+                        deleteModal.style.display =
+                            "none";
+
+                    }
+
+                }
+            );
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>
