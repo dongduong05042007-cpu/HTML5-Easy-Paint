@@ -261,6 +261,250 @@
            GALLERY GRID
         ===================================================== */
 
+        /* ========================================
+   GALLERY
+======================================== */
+
+#gallery {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+
+    padding: 30px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(260px, 1fr));
+
+    gap: 25px;
+}
+
+
+/* ========================================
+   DRAWING CARD
+======================================== */
+
+.drawing-card {
+
+    position: relative;
+
+    background: #2d2f34;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    border: 1px solid #3d4046;
+
+    box-shadow:
+        0 5px 15px rgba(0,0,0,.25);
+
+    cursor: pointer;
+
+    transition:
+        transform .2s,
+        box-shadow .2s;
+}
+
+
+.drawing-card:hover {
+
+    transform: translateY(-5px);
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,.4);
+}
+
+
+/* ========================================
+   IMAGE
+======================================== */
+
+.drawing-image {
+
+    position: relative;
+
+    width: 100%;
+
+    height: 220px;
+
+    background: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+
+.drawing-image img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: contain;
+
+    display: block;
+}
+
+.drawing-thumbnail {
+    position: relative;
+    height: 240px;
+    background: #f1f1f1;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.drawing-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.drawing-thumbnail:hover img {
+    transform: scale(1.02);
+    transition: transform .2s;
+}
+
+
+/* Nút xóa */
+
+.drawing-thumbnail .delete-button {
+    position: absolute;
+
+    top: 10px;
+    right: 10px;
+
+    width: 34px;
+    height: 34px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(0, 0, 0, .65);
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    z-index: 10;
+
+    transition: .2s;
+}
+
+.drawing-thumbnail .delete-button:hover {
+    background: #e53935;
+    transform: scale(1.1);
+}
+
+
+/* ========================================
+   DELETE BUTTON
+======================================== */
+
+.delete-button {
+
+    position: absolute;
+
+    top: 10px;
+    right: 10px;
+
+    width: 36px;
+    height: 36px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: rgba(0,0,0,.65);
+
+    color: white;
+
+    font-size: 17px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: pointer;
+
+    z-index: 10;
+
+    transition: .2s;
+}
+
+
+.delete-button:hover {
+
+    background: #e53935;
+
+    transform: scale(1.08);
+}
+
+
+/* ========================================
+   INFO
+======================================== */
+
+.drawing-info {
+
+    padding: 15px;
+}
+
+
+.drawing-info h3 {
+
+    margin: 0;
+
+    color: white;
+
+    font-size: 17px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.drawing-info p {
+
+    margin-top: 7px;
+
+    color: #999;
+
+    font-size: 12px;
+}
+
+
+/* ========================================
+   PLACEHOLDER
+======================================== */
+
+.image-placeholder {
+
+    font-size: 50px;
+
+    color: #777;
+}
+
         #gallery {
 
             display: grid;

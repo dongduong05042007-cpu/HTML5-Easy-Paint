@@ -208,11 +208,41 @@ async function loadGallery() {
 
             card.innerHTML = `
 
-                <!-- =========================
-                     THUMBNAIL
-                ========================== -->
+    <!-- =========================
+         THUMBNAIL
+    ========================== -->
 
-                ${imageHTML}
+    <div
+        class="drawing-thumbnail"
+        onclick="openDrawing(${id})"
+    >
+
+        ${imageHTML}
+
+        <button
+            class="delete-button"
+            onclick="event.stopPropagation(); showDeleteModal(${id})"
+            title="Xóa bài vẽ"
+        >
+
+            <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z"
+                    fill="currentColor"
+                />
+            </svg>
+
+        </button>
+
+    </div>
+
+
 
 
                 <!-- =========================
@@ -244,21 +274,22 @@ async function loadGallery() {
 
                 <div class="drawing-actions">
 
-
-                    <button
-                        class="open-button"
-                        onclick="openDrawing(${id})">
-
-                        Mở
-
-                    </button>
-
-
                     <button
                         class="delete-button"
                         onclick="showDeleteModal(${id})">
 
-                        Xóa
+                        <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z"
+                                fill="currentColor"
+                            />
+                        </svg>
 
                     </button>
 
@@ -593,3 +624,71 @@ document.addEventListener(
 
     }
 );
+
+// ========================================
+// XÁC NHẬN XÓA
+// ========================================
+
+async function confirmDeleteDrawing() {
+
+    if (
+        deleteId === null ||
+        deleteId === undefined
+    ) {
+
+        console.error(
+            "Không có ID bài vẽ cần xóa!"
+        );
+
+        return;
+
+    }
+
+
+    const id = deleteId;
+
+
+    console.log(
+        "Xác nhận xóa bài vẽ:",
+        id
+    );
+
+
+    try {
+
+        const response =
+            await ApiService.deleteById(id);
+
+
+        console.log(
+            "Kết quả DELETE:",
+            response
+        );
+
+
+        // Đóng modal
+
+        closeDeleteModal();
+
+
+        // Tải lại Gallery
+
+        await loadGallery();
+
+
+    } catch (error) {
+
+        console.error(
+            "Lỗi xóa bài vẽ:",
+            error
+        );
+
+
+        alert(
+            "Không thể xóa bài vẽ!\n\n" +
+            error.message
+        );
+
+    }
+
+}
