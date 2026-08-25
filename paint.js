@@ -4,8 +4,11 @@ var stampId = '';
 var lastColor = 'black';
 var lastStampId = '';
 var currentTool="pen";
+var fillMode = "area";
+
 var startX=0;
 var startY=0;
+
 var snapshot=null;
 var fillShape=false;
 var historyStack=[];
@@ -167,8 +170,10 @@ applyBrush();
 	});
 	
 	document.getElementById('eraser').addEventListener('click', onEraser);
-	document.getElementById('clear').addEventListener('click', onClear);
-	window.addEventListener('keydown', function(e) {
+    document.getElementById('clear').addEventListener('click', onClear);
+    document.getElementById('fill').addEventListener('click', onFill);
+	
+    window.addEventListener('keydown', function(e) {
     if(e.key=="c")
         onClear();
 
@@ -425,18 +430,57 @@ function onMouseUp()
 }
 
 function onClick(e) {
-	if (stampId.length > 0) {
-		context.drawImage($(stampId).get(0), e.pageX - 90, e.pageY - 60, 80, 80);
-	}
 
-	if(currentTool=="text"){
-		textInput.style.display="block";
-		textInput.style.left=e.pageX+"px";
-		textInput.style.top=e.pageY+"px";
-		textInput.value="";
-		textInput.focus();
-		return;
-	}
+    var rect = canvas.getBoundingClientRect();
+
+    var x = Math.floor(
+        e.clientX - rect.left
+    );
+
+    var y = Math.floor(
+        e.clientY - rect.top
+    );
+
+    if (currentTool === "fill") {
+
+        floodFill(x, y);
+
+        return;
+    }
+
+    if (stampId.length > 0) {
+
+        context.drawImage(
+            $(stampId).get(0),
+            x - 40,
+            y - 40,
+            80,
+            80
+        );
+
+        saveState();
+        autoSave();
+
+        return;
+    }
+
+    if (currentTool == "text") {
+
+        textInput.style.display = "block";
+
+        textInput.style.left =
+            e.pageX + "px";
+
+        textInput.style.top =
+            e.pageY + "px";
+
+        textInput.value = "";
+
+        textInput.focus();
+
+        return;
+    }
+
 }
 
 function onColorClick(color) {
@@ -460,27 +504,80 @@ function onColorClick(color) {
 }
 
 function onFill() {
-	// Start a new path to begin drawing in a new color.
-	context.closePath();
-	context.beginPath();
 
-	context.fillStyle = context.strokeStyle;
-	context.fillRect(0, 0, canvas.width, canvas.height);
+    currentTool = "fill";
+
+    console.log("Đã chọn công cụ Tô sơn");
+
+}
+
+function hexToRgba(color) {
+
+    if (!color) {
+        return null;
+    }
+
+    if (color.charAt(0) === "#") {
+
+        var hex = color.substring(1);
+
+        if (hex.length === 3) {
+
+            hex =
+                hex[0] + hex[0] +
+                hex[1] + hex[1] +
+                hex[2] + hex[2];
+        }
+
+        if (hex.length === 6) {
+
+            return {
+                r: parseInt(hex.substring(0, 2), 16),
+                g: parseInt(hex.substring(2, 4), 16),
+                b: parseInt(hex.substring(4, 6), 16)
+            };
+        }
+    }
+
+    var tempCanvas =
+        document.createElement("canvas");
+
+    tempCanvas.width = 1;
+    tempCanvas.height = 1;
+
+    var tempContext =
+        tempCanvas.getContext("2d");
+
+    tempContext.fillStyle = color;
+
+    tempContext.fillRect(0, 0, 1, 1);
+
+    var pixel =
+        tempContext.getImageData(
+            0,
+            0,
+            1,
+            1
+        ).data;
+
+    return {
+        r: pixel[0],
+        g: pixel[1],
+        b: pixel[2]
+    };
 }
 
 function onStamp(id) {
-	// Update the stamp image.
+
 	stampId = '#' + id;
 
     if (lastStampId == stampId) {
-        // User clicked the selected stamp again, so deselect it.
         stampId = '';
     }
 
 	$(lastStampId).css("border", "0px dashed white");
 	$(stampId).css("border", "1px dashed black");
 	
-	// Store stamp so we can un-highlight it next time around.
 	lastStampId = stampId;	
 }
 
@@ -1285,4 +1382,171 @@ function sprayBrush(x, y) {
 
     context.restore();
 
+}
+
+function floodFill(startX, startY) {
+
+    var imageData = context.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    var data = imageData.data;
+
+    var width = canvas.width;
+    var height = canvas.height;
+
+    startX = Math.floor(startX);
+    startY = Math.floor(startY);
+
+    var startIndex =
+        (startY * width + startX) * 4;
+
+    var targetR = data[startIndex];
+    var targetG = data[startIndex + 1];
+    var targetB = data[startIndex + 2];
+    var targetA = data[startIndex + 3];
+
+    var color = hexToRgb(context.fillStyle);
+
+    if (!color) {
+        return;
+    }
+
+    var fillR = color.r;
+    var fillG = color.g;
+    var fillB = color.b;
+
+    if (
+        targetR === fillR &&
+        targetG === fillG &&
+        targetB === fillB
+    ) {
+        return;
+    }
+
+    var stack = [[startX, startY]];
+
+    while (stack.length > 0) {
+
+        var point = stack.pop();
+
+        var x = point[0];
+        var y = point[1];
+
+        if (
+            x < 0 ||
+            x >= width ||
+            y < 0 ||
+            y >= height
+        ) {
+            continue;
+        }
+
+        var index =
+            (y * width + x) * 4;
+
+        if (
+            data[index] !== targetR ||
+            data[index + 1] !== targetG ||
+            data[index + 2] !== targetB ||
+            data[index + 3] !== targetA
+        ) {
+            continue;
+        }
+
+        data[index] = fillR;
+        data[index + 1] = fillG;
+        data[index + 2] = fillB;
+        data[index + 3] = 255;
+
+        stack.push([x + 1, y]);
+        stack.push([x - 1, y]);
+        stack.push([x, y + 1]);
+        stack.push([x, y - 1]);
+    }
+
+    context.putImageData(imageData, 0, 0);
+
+    saveState();
+    autoSave();
+}
+
+function getColorFromCanvas() {
+
+    var tempCanvas =
+        document.createElement("canvas");
+
+    tempCanvas.width = 1;
+    tempCanvas.height = 1;
+
+
+    var tempContext =
+        tempCanvas.getContext("2d");
+
+
+    tempContext.fillStyle =
+        context.fillStyle;
+
+
+    tempContext.fillRect(
+        0,
+        0,
+        1,
+        1
+    );
+
+
+    var pixel =
+        tempContext.getImageData(
+            0,
+            0,
+            1,
+            1
+        ).data;
+
+
+    return {
+
+        r: pixel[0],
+
+        g: pixel[1],
+
+        b: pixel[2]
+
+    };
+
+}
+
+function hexToRgb(color) {
+
+    if (!color) {
+        return null;
+    }
+
+    if (color.charAt(0) === "#") {
+
+        var hex = color.substring(1);
+
+        if (hex.length === 3) {
+
+            hex =
+                hex[0] + hex[0] +
+                hex[1] + hex[1] +
+                hex[2] + hex[2];
+        }
+
+        if (hex.length === 6) {
+
+            return {
+                r: parseInt(hex.substring(0, 2), 16),
+                g: parseInt(hex.substring(2, 4), 16),
+                b: parseInt(hex.substring(4, 6), 16)
+            };
+        }
+    }
+
+    return null;
 }

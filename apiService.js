@@ -1,34 +1,152 @@
-// apiService.js
-
 const API_BASE_URL =
     "http://localhost:3000/api/drawings";
-
-
 const ApiService = {
 
-    async saveToCloud(title, imageData) {
+    getToken() {
+
+        return localStorage.getItem("token");
+
+    },
+
+    setToken(token) {
+
+        localStorage.setItem("token", token);
+
+    },
+
+    clearToken() {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+    },
+
+    checkTokenExpired(token) {
+
+        if (!token) {
+            return true;
+        }
 
         try {
 
+            const payload =
+                JSON.parse(
+                    atob(
+                        token.split(".")[1]
+                    )
+                );
+
+            const currentTime =
+                Math.floor(Date.now() / 1000);
+
+            return payload.exp < currentTime;
+
+        } catch (error) {
+
+            console.error(
+                "Token không hợp lệ:",
+                error
+            );
+
+            return true;
+
+        }
+
+    },
+
+    getValidToken() {
+
+        const token =
+            this.getToken();
+
+        if (!token) {
+
+            console.error(
+                "Không tìm thấy token!"
+            );
+
+            return null;
+
+        }
+
+        if (
+            this.checkTokenExpired(token)
+        ) {
+
+            console.error(
+                "Token đã hết hạn!"
+            );
+
+            this.clearToken();
+
+            return null;
+
+        }
+
+        return token;
+
+    },
+
+    async saveToCloud(
+        title,
+        imageData
+    ) {
+
+        try {
+
+            const token =
+                this.getValidToken();
+
+            if (!token) {
+
+                throw new Error(
+                    "Bạn chưa đăng nhập hoặc token đã hết hạn!"
+                );
+
+            }
+
+
             const response =
-                await fetch(API_BASE_URL, {
+                await fetch(
+                    API_BASE_URL,
+                    {
 
-                    method: "POST",
+                        method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                        headers: {
 
-                    body: JSON.stringify({
-                        title: title,
-                        imageData: imageData
-                    })
+                            "Content-Type":
+                                "application/json",
 
-                });
+                            "Authorization":
+                                `Bearer ${token}`
+
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                title:
+                                    title,
+
+                                imageData:
+                                    imageData
+
+                            })
+
+                    }
+                );
 
 
             if (!response.ok) {
+
+                const errorText =
+                    await response.text();
+
+                console.error(
+                    "Server trả về:",
+                    errorText
+                );
 
                 throw new Error(
                     "Không thể lưu bài vẽ lên Cloud!"
@@ -57,14 +175,48 @@ const ApiService = {
 
         try {
 
+            const token =
+                this.getValidToken();
+
+            if (!token) {
+
+                throw new Error(
+                    "Bạn chưa đăng nhập hoặc token đã hết hạn!"
+                );
+
+            }
+
+
             const response =
-                await fetch(API_BASE_URL);
+                await fetch(
+                    API_BASE_URL,
+                    {
+
+                        method: "GET",
+
+                        headers: {
+
+                            "Authorization":
+                                `Bearer ${token}`
+
+                        }
+
+                    }
+                );
 
 
             if (!response.ok) {
 
+                const errorText =
+                    await response.text();
+
+                console.error(
+                    "Server trả về:",
+                    errorText
+                );
+
                 throw new Error(
-                    "Không thể lấy danh sách bài vẽ!"
+                    "Không thể lấy danh sách bài vẽ"
                 );
 
             }
@@ -90,13 +242,45 @@ const ApiService = {
 
         try {
 
+            const token =
+                this.getValidToken();
+
+            if (!token) {
+
+                throw new Error(
+                    "Bạn chưa đăng nhập hoặc token đã hết hạn!"
+                );
+
+            }
+
+
             const response =
                 await fetch(
-                    `${API_BASE_URL}/${id}`
+                    `${API_BASE_URL}/${id}`,
+                    {
+
+                        method: "GET",
+
+                        headers: {
+
+                            "Authorization":
+                                `Bearer ${token}`
+
+                        }
+
+                    }
                 );
 
 
             if (!response.ok) {
+
+                const errorText =
+                    await response.text();
+
+                console.error(
+                    "Server trả về:",
+                    errorText
+                );
 
                 throw new Error(
                     "Không thể lấy bài vẽ!"
@@ -125,6 +309,18 @@ const ApiService = {
 
         try {
 
+            const token =
+                this.getValidToken();
+
+            if (!token) {
+
+                throw new Error(
+                    "Bạn chưa đăng nhập hoặc token đã hết hạn!"
+                );
+
+            }
+
+
             console.log(
                 "Đang gửi yêu cầu DELETE:",
                 `${API_BASE_URL}/${id}`
@@ -135,7 +331,16 @@ const ApiService = {
                 await fetch(
                     `${API_BASE_URL}/${id}`,
                     {
-                        method: "DELETE"
+
+                        method: "DELETE",
+
+                        headers: {
+
+                            "Authorization":
+                                `Bearer ${token}`
+
+                        }
+
                     }
                 );
 
@@ -174,3 +379,6 @@ const ApiService = {
     }
 
 };
+
+
+window.ApiService = ApiService;

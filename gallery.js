@@ -1,4 +1,45 @@
-let deleteId = null;
+let deleteId = null; 
+
+function getCurrentUser() {
+
+    try {
+
+        const user =
+            localStorage.getItem("user");
+
+        if (!user) {
+            return null;
+        }
+
+        return JSON.parse(user);
+
+    } catch (error) {
+
+        console.error(
+            "Không đọc được user:",
+            error
+        );
+
+        return null;
+    }
+
+} 
+
+function isAdmin() {
+
+    const user =
+        getCurrentUser();
+
+    if (!user) {
+        return false;
+    }
+
+    return (
+        user.username &&
+        user.username.toLowerCase() === "admin"
+    );
+
+} 
 
 async function loadGallery() {
 
@@ -11,8 +52,6 @@ async function loadGallery() {
     const galleryCount =
         document.getElementById("galleryCount");
 
-
-    // Kiểm tra HTML
 
     if (!gallery) {
 
@@ -27,22 +66,44 @@ async function loadGallery() {
 
     try {
 
-        console.log("================================");
+        console.log(
+            "================================"
+        );
 
-        console.log("ĐANG TẢI GALLERY");
+        console.log(
+            "ĐANG TẢI GALLERY"
+        );
 
-        console.log("================================");
+        console.log(
+            "================================"
+        );
 
-        const drawings = await ApiService.getList();
+
+        const drawings =
+            await ApiService.getList();
 
 
-        console.log("Dữ liệu nhận từ API:", drawings);
+        console.log(
+            "Dữ liệu nhận từ API:",
+            drawings
+        );
 
-        if (loading) {loading.style.display = "none";}
+
+        if (loading) {
+
+            loading.style.display =
+                "none";
+
+        }
+
 
         gallery.innerHTML = "";
 
-        if (!drawings || drawings.length === 0) {
+
+        if (
+            !drawings ||
+            drawings.length === 0
+        ) {
 
             if (galleryCount) {
 
@@ -76,12 +137,13 @@ async function loadGallery() {
 
         }
 
+
         if (galleryCount) {
 
             galleryCount.textContent =
                 `${drawings.length} bản vẽ`;
 
-        }
+        } 
 
         drawings.forEach(function (drawing) {
 
@@ -90,14 +152,17 @@ async function loadGallery() {
                 drawing
             );
 
+
             const id =
                 drawing.Id ??
                 drawing.id;
+
 
             const title =
                 drawing.Title ??
                 drawing.title ??
                 "Bài vẽ không tên";
+
 
             const imageData =
                 drawing.ImageData ??
@@ -105,10 +170,18 @@ async function loadGallery() {
                 drawing.image_data ??
                 null;
 
+
             const createdAt =
                 drawing.CreatedAt ??
                 drawing.createdAt ??
                 null;
+
+
+            const drawingUserId =
+                drawing.UserId ??
+                drawing.userId ??
+                null;
+
 
             let formattedDate =
                 "Không rõ ngày tạo";
@@ -132,8 +205,7 @@ async function loadGallery() {
                             }
                         );
 
-                }
-                catch (error) {
+                } catch (error) {
 
                     console.warn(
                         "Không thể format ngày:",
@@ -142,14 +214,14 @@ async function loadGallery() {
 
                 }
 
-            }
+            } 
 
             const card =
                 document.createElement("div");
 
 
             card.className =
-                "drawing-card";
+                "drawing-card"; 
 
             let imageHTML = "";
 
@@ -162,9 +234,12 @@ async function loadGallery() {
                 imageHTML = `
 
                     <img
-                        src="${imageData}"
+                        src="${escapeHTML(imageData)}"
                         alt="${escapeHTML(title)}"
-                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        onerror="
+                            this.style.display='none';
+                            this.nextElementSibling.style.display='flex';
+                        "
                     >
 
                     <div
@@ -183,8 +258,7 @@ async function loadGallery() {
 
                 `;
 
-            }
-            else {
+            } else {
 
                 imageHTML = `
 
@@ -204,79 +278,86 @@ async function loadGallery() {
 
                 `;
 
-            }
+            } 
 
             card.innerHTML = `
 
-    <!-- =========================
-         THUMBNAIL
-    ========================== -->
+                <div
+                    class="drawing-thumbnail"
+                    onclick="openDrawing(${id})"
+                >
 
-    <div
-        class="drawing-thumbnail"
-        onclick="openDrawing(${id})"
-    >
+                    ${imageHTML}
 
-        ${imageHTML}
+                    <button
+                        class="delete-button"
+                        onclick="
+                            event.stopPropagation();
+                            showDeleteModal(${id});
+                        "
+                        title="Xóa bài vẽ"
+                    >
 
-        <button
-            class="delete-button"
-            onclick="event.stopPropagation(); showDeleteModal(${id})"
-            title="Xóa bài vẽ"
-        >
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
 
-            <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z"
-                    fill="currentColor"
-                />
-            </svg>
+                            <path
+                                d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z"
+                                fill="currentColor"
+                            />
 
-        </button>
+                        </svg>
 
-    </div>
+                    </button>
 
+                </div>
 
-
-
-                <!-- =========================
-                     THÔNG TIN
-                ========================== -->
 
                 <div class="drawing-info">
 
                     <h3 class="drawing-title">
+
                         ${escapeHTML(title)}
+
                     </h3>
 
 
                     <p class="drawing-id">
+
                         ID: ${id}
+
+                    </p>
+
+
+                    <p class="drawing-user">
+
+                        UserId: ${drawingUserId}
+
                     </p>
 
 
                     <p class="drawing-date">
+
                         📅 ${formattedDate}
+
                     </p>
 
                 </div>
 
 
-                <!-- =========================
-                     BUTTONS
-                ========================== -->
-
                 <div class="drawing-actions">
 
                     <button
                         class="delete-button"
-                        onclick="showDeleteModal(${id})">
+                        onclick="
+                            showDeleteModal(${id});
+                        "
+                    >
 
                         <svg
                             width="24"
@@ -285,18 +366,20 @@ async function loadGallery() {
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
                         >
+
                             <path
                                 d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z"
                                 fill="currentColor"
                             />
+
                         </svg>
 
                     </button>
 
-
                 </div>
 
             `;
+
 
             gallery.appendChild(card);
 
@@ -307,8 +390,8 @@ async function loadGallery() {
             "Gallery đã tải xong!"
         );
 
-    }
-    catch (error) {
+
+    } catch (error) {
 
         console.error(
             "LỖI GALLERY:",
@@ -360,7 +443,7 @@ async function loadGallery() {
 
     }
 
-}
+} 
 
 function openDrawing(id) {
 
@@ -369,8 +452,6 @@ function openDrawing(id) {
         id
     );
 
-
-    // Kiểm tra ID
 
     if (
         id === undefined ||
@@ -385,10 +466,11 @@ function openDrawing(id) {
 
     }
 
+
     window.location.href =
         `paint.html?id=${encodeURIComponent(id)}`;
 
-}
+} 
 
 function showDeleteModal(id) {
 
@@ -421,7 +503,7 @@ function showDeleteModal(id) {
     modal.style.display =
         "flex";
 
-}
+} 
 
 function closeDeleteModal() {
 
@@ -441,50 +523,73 @@ function closeDeleteModal() {
 
     }
 
-}
+} 
 
-async function deleteDrawing(id) {
+async function confirmDeleteDrawing() {
 
-    console.log("================================");
-    console.log("BẮT ĐẦU XÓA BÀI VẼ");
-    console.log("ID cần xóa:", id);
-    console.log("================================");
+    if (
+        deleteId === null ||
+        deleteId === undefined
+    ) {
 
-    const result = confirm(
-        "Bạn có chắc chắn muốn xóa bài vẽ này không?"
+        console.error(
+            "Không có ID bài vẽ cần xóa!"
+        );
+
+        return;
+
+    }
+
+
+    const id =
+        deleteId;
+
+
+    console.log(
+        "Xác nhận xóa bài vẽ:",
+        id
     );
 
-    if (!result) {
-        console.log("Người dùng đã hủy xóa.");
-        return;
-    }
 
     try {
 
-        console.log("Đang gọi ApiService.deleteById...");
-        console.log("ID:", id);
+        const response =
+            await ApiService.deleteById(id);
 
-        const response = await ApiService.deleteById(id);
 
-        console.log("Kết quả DELETE:", response);
+        console.log(
+            "Kết quả DELETE:",
+            response
+        );
 
-        alert("Xóa bài vẽ thành công!");
+
+        closeDeleteModal();
+
+
+        alert(
+            "Xóa bài vẽ thành công!"
+        );
+
 
         await loadGallery();
 
+
     } catch (error) {
 
-        console.error("================================");
-        console.error("LỖI XÓA BÀI VẼ");
-        console.error("================================");
-        console.error(error);
+        console.error(
+            "Lỗi xóa bài vẽ:",
+            error
+        );
+
 
         alert(
             "Không thể xóa bài vẽ!\n\n" +
-            "Mở F12 → Console để xem lỗi."
+            error.message
         );
+
     }
-}
+
+} 
 
 function escapeHTML(value) {
 
@@ -525,7 +630,7 @@ function escapeHTML(value) {
             "&#039;"
         );
 
-}
+} 
 
 function initDeleteModal() {
 
@@ -546,6 +651,7 @@ function initDeleteModal() {
             "deleteModal"
         );
 
+
     if (cancelButton) {
 
         cancelButton.addEventListener(
@@ -559,6 +665,7 @@ function initDeleteModal() {
 
     }
 
+
     if (confirmButton) {
 
         confirmButton.addEventListener(
@@ -571,6 +678,7 @@ function initDeleteModal() {
         );
 
     }
+
 
     if (modal) {
 
@@ -591,6 +699,7 @@ function initDeleteModal() {
 
     }
 
+
     document.addEventListener(
         "keydown",
         function (event) {
@@ -608,12 +717,25 @@ function initDeleteModal() {
 
 }
 
+
 document.addEventListener(
     "DOMContentLoaded",
     function () {
 
         console.log(
             "Paint Gallery đang khởi động..."
+        );
+
+
+        console.log(
+            "User hiện tại:",
+            getCurrentUser()
+        );
+
+
+        console.log(
+            "Có phải Admin:",
+            isAdmin()
         );
 
 
@@ -624,71 +746,3 @@ document.addEventListener(
 
     }
 );
-
-// ========================================
-// XÁC NHẬN XÓA
-// ========================================
-
-async function confirmDeleteDrawing() {
-
-    if (
-        deleteId === null ||
-        deleteId === undefined
-    ) {
-
-        console.error(
-            "Không có ID bài vẽ cần xóa!"
-        );
-
-        return;
-
-    }
-
-
-    const id = deleteId;
-
-
-    console.log(
-        "Xác nhận xóa bài vẽ:",
-        id
-    );
-
-
-    try {
-
-        const response =
-            await ApiService.deleteById(id);
-
-
-        console.log(
-            "Kết quả DELETE:",
-            response
-        );
-
-
-        // Đóng modal
-
-        closeDeleteModal();
-
-
-        // Tải lại Gallery
-
-        await loadGallery();
-
-
-    } catch (error) {
-
-        console.error(
-            "Lỗi xóa bài vẽ:",
-            error
-        );
-
-
-        alert(
-            "Không thể xóa bài vẽ!\n\n" +
-            error.message
-        );
-
-    }
-
-}
